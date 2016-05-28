@@ -15,5 +15,8 @@
     "sprintf-js": "registry:dt/sprintf-js#0.0.0+20160317120654",
     "validator": "registry:dt/validator#4.5.1+20160316155526"
   },
-  "devDependencies": {}
+  "devDependencies": {},
+  "dependencies": {
+    "gbxremote": "file:typings/custom/gbxremote/typings.json"
+  }
 }
