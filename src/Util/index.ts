@@ -1,7 +1,7 @@
 
 import {BaseFacade} from './Facade';
 
-export namespace Util {
+export module Util {
   export class Facade extends BaseFacade {
     constructor () {
       super();

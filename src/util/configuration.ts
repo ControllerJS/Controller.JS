@@ -3,6 +3,7 @@ import * as directory from './Directory'
 
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
+import {Game} from '../Server/Client';
 
 let Package = require('./../../package.json');
 
@@ -103,7 +104,8 @@ export interface AppConfig {
     authentication: {
       username: string,
       password: string
-    }
+    },
+    game: Game,
   },
   masteradmins?: string[],
   db: {
