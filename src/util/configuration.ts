@@ -1,8 +1,10 @@
 import * as Joi from 'joi';
-import * as directory from './directory'
+import * as directory from './Directory'
 
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
+
+let Package = require('./../../package.json');
 
 /**
  * Configuration Class. Access by using the instance export.
@@ -12,17 +14,19 @@ export class Configuration {
   private location: string;
 
   public  config: ConfigSchema;
+  public  version: string;
 
   private static _instance: Configuration;
 
   public static get instance() {
-    if (! Configuration._instance) {
+    if (! Configuration._instance)
       Configuration._instance = new Configuration();
-    }
     return Configuration._instance;
   }
 
-  constructor() {}
+  constructor() {
+    this.version = Package.version;
+  }
 
   public load (location?: string): boolean {
     try {
@@ -85,44 +89,47 @@ let schema = {
 };
 
 export interface ConfigSchema {
-  config: {
-    debug: boolean,
-    server: {
-      address: string,
-      port: number,
-      authentication: {
-        username: string,
-        password: string
-      }
-    },
-    masteradmins?: string[],
-    db: {
-      dialect: DatabaseDialect,
-      database: string,
-      authentication: {
-        username: string,
-        password: string
-      },
-      pool: {
-        min: number,
-        max: number,
-        idle: number
-      },
-      mysql: {
-        host: number,
-        port: number
-      },
-      mariadb: {
-        host: number,
-        port: number
-      },
-      sqlite: {
-        storage: string
-      }
-    }
-  },
+  config: AppConfig,
   plugins:{
     [s: string]: PluginConfig
+  }
+}
+
+export interface AppConfig {
+  debug: boolean,
+  server: {
+    address: string,
+    port: number,
+    authentication: {
+      username: string,
+      password: string
+    }
+  },
+  masteradmins?: string[],
+  db: {
+    dialect: DatabaseDialect,
+    database: string,
+    authentication: {
+      username: string,
+      password: string
+    },
+    pool: {
+      min: number,
+      max: number,
+      idle: number
+    },
+    mysql: {
+      host: number,
+      port: number
+    },
+    mariadb: {
+      host: number,
+      port: number
+    },
+    sqlite: {
+      storage: string
+    },
+    debug?: boolean
   }
 }
 
@@ -131,5 +138,9 @@ export interface PluginConfig {
 }
 
 export enum DatabaseDialect {
-  mysql, mariadb, sqlite
+  mssql,
+  mysql,
+  mariadb,
+  sqlite,
+  postgres
 }
