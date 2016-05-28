@@ -1,4 +1,9 @@
 {
   "name": "maniajs",
-  "globalDependencies": {}
+  "globalDependencies": {
+    "gbxremote": "file:typings/custom/gbxremote/typings.json"
+  },
+  "devDependencies": {
+    "sequelize": "registry:npm/sequelize#3.0.0+20160506115852"
+  }
 }

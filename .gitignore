@@ -17,7 +17,7 @@ npm-debug.log*
 
 # Typescript
 tmp/*
-typings/
+typings/*
 .grunt
 
 !typings/custom
