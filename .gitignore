@@ -19,6 +19,7 @@ npm-debug.log*
 tmp/*
 typings/*
 .grunt
+.baseDir.ts
 
 !typings/custom
 

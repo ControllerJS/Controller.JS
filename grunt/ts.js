@@ -3,8 +3,8 @@
 module.exports = {
   default: {
     files: [
-      { src: 'src/**.ts'  , dest: 'lib/src'  },
-      { src: 'test/**.ts' , dest: 'lib/test' }
+      { src: 'src/**.ts'  , dest: 'lib'  },
+      // { src: 'test/**.ts' , dest: 'lib/test' }
     ],
 
     options: {
