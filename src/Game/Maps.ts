@@ -7,7 +7,7 @@ import {Model} from 'sequelize';
 import {Instance} from 'sequelize';
 
 // TODO
-export interface Map extends Instance {
+export interface Map extends Instance<any> {
 
 }
 
@@ -49,13 +49,13 @@ export class Maps {
     let Map: Model<any,any> = this.app.models['Map'];
 
     // Get all maps on server, sync with database.
-    let mapList:any[] = await this.app.serverFacade.client.gbx.query('GetMapList', [-1, 0]);
+    let mapList: any[] = await this.app.serverFacade.client.gbx.query('GetMapList', [-1, 0]);
 
     // Clear current list first.
     this.list = {};
 
     // TODO: Define interfaces for the maniaplanet return values.
-    for (let data:any in mapList) {
+    for (let data of mapList) {
       let exists = await Map.findOne({where: {uid: data.UId}});
       if (! exists) {
         let map = await Map.create({

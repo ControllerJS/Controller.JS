@@ -5,13 +5,29 @@
  */
 'use strict';
 
-import * as util from 'util';
-
 import {App} from './../App';
-import {Client} from './Client';
+import {Client, Game} from './Client';
 
-import ManiaPlanetCalls from './callbacks/maniaplanet-callbacks.js';
-import TrackManiaCalls from './callbacks/trackmania-callbacks.js';
+import ManiaPlanetCalls from './callbacks/ManiaplanetCallbacks';
+import TrackManiaCalls from './callbacks/TrackmaniaCallbacks';
+
+export interface CallbackOptions {
+  callback: string;
+  event: string;
+  parameters?: {[s: string]: number};
+
+  game?: Game[];
+  type?: CallbackType;
+
+  flow? (app: App, params: any): Promise<any>;
+  pass? (params: any): boolean;
+  parse? (raw: any): any;
+}
+
+export enum CallbackType {
+  native,
+  scripted
+}
 
 /**
  * CallbackManager
@@ -42,7 +58,7 @@ export class CallbackManager {
    *
    * @param {function} options.flow Optional promise returning funciton for controlling the game flow. Calls with first parameter app and second params.
    */
-  register(options) {
+  public async register(options: CallbackOptions) {
     let callbackName = options.callback;
     let eventName = options.event;
     let parameters = options.parameters || {};
@@ -51,7 +67,7 @@ export class CallbackManager {
     let pass = options.pass;
     let flow = options.flow;
 
-    let type = options.type || 'native';
+    let type = options.type || CallbackType.native;
     let game = options.game || []; // Default all games
 
     // Register callback, make it an event.
@@ -103,16 +119,15 @@ export class CallbackManager {
           this.app.log.warn(err.stack);
         });
     });
-
   }
 
-  
+
   /**
    * Load Set from specific prefixed sets.
    *
    * @param {string} name For example: 'maniaplanet'
    */
-  loadSet(name) {
+  public loadSet(name) {
     switch(name) {
       case 'maniaplanet': ManiaPlanetCalls(this); break;
       case 'trackmania' : TrackManiaCalls(this);  break;

@@ -2,7 +2,7 @@
  * CommandManager
  */
 
-import { EventEmitter } from 'events';
+import {EventEmitter} from 'events';
 import {App} from '../App';
 import {Client} from './Client';
 
@@ -18,8 +18,8 @@ export interface CommandOptions {
 /**
  * CommandManager - Holds events for '/' commands.
  */
-export default class CommandManager extends EventEmitter {
-
+export class CommandManager {
+  private events: EventEmitter;
   private app: App;
   private client: Client;
 
@@ -31,8 +31,8 @@ export default class CommandManager extends EventEmitter {
    * @param {ServerClient} client
    */
   constructor(client) {
-    super();
-    this.setMaxListeners(0);
+    this.events = new EventEmitter();
+    this.events.setMaxListeners(0);
 
     this.app = App.instance;
     this.client = client;
@@ -60,20 +60,20 @@ export default class CommandManager extends EventEmitter {
       let command = parts[0];
       let params = parts.slice(1);
 
-      if (!this.app.players.list.hasOwnProperty(data.login)) {
+      if (!this.app.gameFacade.players.list.hasOwnProperty(data.login)) {
         return;
       }
 
       // Admin command?
       if (command === 'admin' && params.length >= 1) {
         if (this.commands.hasOwnProperty('admin__' + params[0])) {
-          return this.handleAdmin(this.app.players.list[data.login], this.commands['admin__' + params[0]], params.slice(1), data);
+          return this.handleAdmin(this.app.gameFacade.players.list[data.login], this.commands['admin__' + params[0]], params.slice(1), data);
         }
       }
 
       // Non-admin command (could still have level btw).
       if (this.commands.hasOwnProperty(command)) {
-        return this.handle(this.app.players.list[data.login], this.commands[command], params, data);
+        return this.handle(this.app.gameFacade.players.list[data.login], this.commands[command], params, data);
       }
 
       // If not yet returned, show error.
@@ -91,7 +91,7 @@ export default class CommandManager extends EventEmitter {
    */
   private handle (player, command, params, data) {
     if (player.level >= command.level) {
-      return this.emit(command.command, this.app.players.list[data.login], params, data);
+      return this.events.emit(command.command, this.app.gameFacade.players.list[data.login], params, data);
     }
     this.app.server.send().chat('Error, you are not allowed to use this command!', {destination: data.login}).exec();
   }
@@ -106,7 +106,7 @@ export default class CommandManager extends EventEmitter {
    */
   private handleAdmin (player, command, params, data) {
     if (player.level >= command.level) {
-      return this.emit(command.command, this.app.players.list[data.login], params, data);
+      return this.events.emit(command.command, this.app.gameFacade.players.list[data.login], params, data);
     }
     this.app.server.send().chat('Error, you are not allowed to use this command!', {destination: data.login}).exec();
   }
@@ -151,7 +151,7 @@ export default class CommandManager extends EventEmitter {
    * @param {CommandManager~CommandCallback} callback
    * @param {boolean} [single] Single time?
    */
-  register(command: string, options: CommandOptions | string | number, callback: Function, single?: boolean) {
+  register(command: string, options: CommandOptions | string | number | any, callback: Function, single?: boolean) {
     // Parse optional and combined parameters.
     callback = callback || function() {};
     if (typeof options === 'number') {
@@ -191,11 +191,11 @@ export default class CommandManager extends EventEmitter {
 
     // Register callback.
     if (single) {
-      super.once(command, (player, params) => {
+      this.events.once(command, (player, params) => {
         callback(player, params);
       });
     } else {
-      super.on(command, (player, params) => {
+      this.events.on(command, (player, params) => {
         callback(player, params);
       });
     }

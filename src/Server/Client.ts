@@ -1,8 +1,10 @@
 /**
  * Client Manager - Will connect to the maniaplanet server
  */
-import {Gbx} from 'gbxremote';
-import { EventEmitter } from 'events';
+
+import {Client as GbxClient} from 'gbxremote';
+
+import {EventEmitter} from 'events';
 import * as fs from 'fs';
 
 import {CallbackManager} from './CallbackManager';
@@ -14,7 +16,7 @@ export class Client extends EventEmitter {
 
   private app: App;
 
-  public gbx: Gbx;
+  public gbx: any;
   public command: CommandManager;
   public callback: CallbackManager;
 
@@ -45,15 +47,13 @@ export class Client extends EventEmitter {
 
   /**
    * Prepare the client. parse configuration and pass it to the gbx client.
-   *
-   * @param {App} app context
    */
-  constructor(app) {
+  constructor() {
     super();
-
     this.setMaxListeners(0);
 
-    this.app = app;
+    this.app = App.instance;
+
     this.gbx = null;
     /** @type {CallbackManager} */
     this.callback = null;
@@ -61,10 +61,10 @@ export class Client extends EventEmitter {
     /** @type {CommandManager} */
     this.command = null;
 
-    this.server = app.config.config.server;
+    this.server = this.app.config.config.server;
 
     // Current Game Name, 'trackmania' or 'shootmania'.
-    this.gameName = app.config.config.server.game || 'trackmania';
+    this.gameName = this.app.config.config.server.game || Game.trackmania;
 
     this.options = {}; // Will be the result of GetServerOptions() call to the mp server.
     this.game = {}; // Will be the result of GetGameInfo() call.
@@ -75,7 +75,7 @@ export class Client extends EventEmitter {
    *
    * @returns {Send}
    */
-  send() {
+  public send(): Send {
     return new Send(this);
   }
 
@@ -84,135 +84,106 @@ export class Client extends EventEmitter {
    *
    * @returns {Promise}
    */
-  connect() {
+  public async connect() {
     this.app.log.debug("Connecting to ManiaPlanet Server...");
 
-    return new Promise( (resolve, reject) => {
-      this.gbx = Gbx.createClient(this.server.port, this.server.address);
+    this.gbx = new GbxClient(this.server.port, this.server.address);
 
-      // On Connect
-      this.gbx.on('connect', () => {
-        this.app.log.debug('Connection to ManiaPlanet server successful!');
+    // Connect to ManiaPlanet
+    await this.gbx.connect();
 
-        if (this.app.config.config.hasOwnProperty('debug') && this.app.config.config.debug) {
-          this.gbx.on('callback', (method, params) => {
-            this.app.log.debug("GBX: Callback '" + method + "':", params);
-          });
-        }
-        return resolve();
+    // Debug all callbacks.
+    if (this.app.config.config.hasOwnProperty('debug') && this.app.config.config.debug) {
+      this.gbx.on('callback', (method, params) => {
+        this.app.log.debug("GBX: Callback '" + method + "':", params);
       });
+    }
 
-      // On Error
-      this.gbx.on('error', (err) => {
-        this.app.log.fatal(err.stack);
+    // On gbx error.
+    this.gbx.on('error', (err) => {
+      this.app.log.fatal(err.stack);
 
-        if (err.message === 'read ECONNRESET') {
-          this.app.log.fatal('Connection with ManiaPlanet server lost!');
-          process.exit(1);
-        } else {
-          return reject(err);
-        }
-      });
-
-    }).then(() => {
-      // Authentication
-      return this.gbx.query('Authenticate', [this.server.authentication.username, this.server.authentication.password]);
-    }).then(() => {
-      // Set API Version
-      this.app.log.debug("Connection to ManiaPlanet Server, Successfully authenticated!");
-      return this.gbx.query('SetApiVersion', ['2015-02-10']);
-    }).then(() => {
-      // Set Callbacks On
-      this.app.log.debug("Connection to ManiaPlanet Server, Successfully set api version!");
-
-      return this.gbx.query('EnableCallbacks', [true]);
-    }).then(() => {
-      // Get server information
-      this.app.log.debug("Connection to ManiaPlanet Server, Successfully enabled callbacks!");
-      // Send boot msg
-      this.send().chat("$o$f90Mania$z$o$f90JS$z$fff: Booting Controller...").exec();
-
-      // Hide all current ManiaLinks
-      this.gbx.query('SendHideManialinkPage', []);
-
-      return this.gbx.query('GetVersion', []);
-    }).then((res) => {
-      // Get System Info
-      this.app.log.debug("Connection to ManiaPlanet Server, Getting information...!");
-
-      this.version = res.Version;
-      this.build = res.Build;
-      this.apiVersion = res.ApiVersion;
-
-      return this.gbx.query('GetSystemInfo', []);
-    }).then((res) => {
-      // Get Detailed Server Player Information (about the server player).
-      this.ip = res.PublishedIp;
-      this.ports = {port: res.Port, P2PPort: res.P2PPort};
-      this.titleId = res.TitleId;
-      this.login = res.ServerLogin;
-      this.playerId = res.ServerPlayerId;
-
-      return this.gbx.query('GetDetailedPlayerInfo', [this.login]);
-    }).then((res) => {
-      // Get server options
-      this.path = res.Path;
-
-      return this.getServerOptions();
-    }).then((options) => {
-      this.name = options.Name;
-      //noinspection TypeScriptValidateTypes
-      this.comment = options.Comment;
-      this.options = options;
-    }).then(() => {
-      // Get game info
-      return this.getGameInfos();
-    }).then((info) => {
-      this.game = info;
-
-      // Get Directories.
-      return this.getServerDirectories();
-    }).then((dirs) => {
-      this.paths = dirs;
-
-      // Test writing and reading in the data directory
-      if (! fs.existsSync(this.paths.data)) {
-        return Promise.reject(new Error('ManiaJS could not find the ManiaPlanet data dir! Is ManiaJS running on the same machine?'));
+      if (err.message === 'read ECONNRESET') {
+        this.app.log.fatal('Connection with ManiaPlanet server lost!');
+        process.exit(1);
       }
-      try {fs.accessSync(this.paths.data)}
-      catch (err) {return Promise.reject(err);}
+    });
+
+    // Authenticate, set api version, set callbacks on.
+    try {
+      await this.gbx.query('Authenticate', [this.server.authentication.username, this.server.authentication.password]);
+      this.app.log.debug("Connection to ManiaPlanet Server, Successfully authenticated!");
+      await this.gbx.query('SetApiVersion', ['2015-02-10']);
+      this.app.log.debug("Connection to ManiaPlanet Server, Successfully set api version!");
+      await this.gbx.query('EnableCallbacks', [true]);
+      this.app.log.debug("Connection to ManiaPlanet Server, Successfully enabled callbacks!");
+
+      // Send booting message to chat.
+      await this.send().chat("$o$f90Mania$z$o$f90JS$z$fff: Booting Controller...").exec();
+      // Hide all current ManiaLinks
+      await this.gbx.query('SendHideManialinkPage');
+
+      // Version Information
+      let versionInfo = await this.gbx.query('GetVersion');
+      this.version = versionInfo.Version;
+      this.build = versionInfo.Build;
+      this.apiVersion = versionInfo.ApiVersion;
+
+      // System Information
+      let systemInfo = await this.gbx.query('GetSystemInfo');
+      this.ip = systemInfo.PublishedIp;
+      this.ports = {port: systemInfo.Port, P2PPort: systemInfo.P2PPort};
+      this.titleId = systemInfo.TitleId;
+      this.login = systemInfo.ServerLogin;
+      this.playerId = systemInfo.ServerPlayerId;
+
+      // Get Detailed Server Player Information (about the server player).
+      let serverPlayerInfo = await this.gbx.query('GetDetailedPlayerInfo', [this.login]);
+      this.path = serverPlayerInfo.Path;
+
+      // Update server options.
+      await this.getServerOptions();
+
+      // Update game infos.
+      await this.getGameInfos();
+
+      // Get directories
+      this.paths = await this.getServerDirectories();
+
+      // Test writing files (test if we have access to the directories).
+      if (! fs.existsSync(this.paths.data))
+        throw new Error('ManiaJS could not find the ManiaPlanet data dir! Is ManiaJS running on the same machine?');
+      fs.accessSync(this.paths.data);
 
       // If scripted? Then enable scripted callbacks
       if (this.isScripted()) {
-
         this.app.log.debug('Enabling Scripted Callbacks...');
 
-        return new Promise((resolve, reject) => {
-          this.gbx.query('GetModeScriptSettings', []).then((settings) => {
-            if (! settings) {
-              return reject(new Error('No ScriptSettings received!'));
-            }
+        let settings = await this.gbx.query('GetModeScriptSettings');
+        if (! settings) {
+          throw new Error('No ScriptSettings received!');
+        }
 
-            // Add callback listener.
-            if (! settings.hasOwnProperty('S_UseScriptCallbacks')) {
-              return resolve(); // Ignore and continue.
-            }
+        // Add callback listener.
+        if (! settings.hasOwnProperty('S_UseScriptCallbacks')) {
+          return; // Ignore and continue.
+        }
 
-            settings['S_UseScriptCallbacks'] = true;
+        settings['S_UseScriptCallbacks'] = true;
 
-            // TODO: Floats.
-            console.log(settings);
+        // TODO: Floats.
+        console.log(settings);
 
-            // Set and resolve, BUG: will throw error, type error.
-            this.gbx.query('SetModeScriptSettings', [settings])
-              .then(() => resolve())
-              .catch((err) => reject(err));
-          });
-        });
+        // Set and resolve, BUG: will throw error, type error.
+        await this.gbx.query('SetModeScriptSettings', [settings]);
+
+        let newSettings = await this.gbx.query('GetModeScriptSettings', []);
+        // TODO
       }
-
-      return Promise.resolve();
-    });
+    } catch (err) {
+      this.app.log.fatal(err);
+      process.exit(1);
+    }
   }
 
   /**
@@ -220,20 +191,16 @@ export class Client extends EventEmitter {
    *
    * @return {Promise}
    */
-  register() {
+  public async register() {
     this.app.log.debug('Registering callbacks...');
-    return new Promise((resolve) => {
-      this.callback = new CallbackManager(this);
-      this.command = new CommandManager(this);
 
-      this.callback.loadSet('maniaplanet');
+    this.callback = new CallbackManager(this);
+    this.command = new CommandManager(this);
 
-      if (this.app.config.config.server.game === Game.trackmania) {
-        this.callback.loadSet('trackmania');
-      }
+    this.callback.loadSet('maniaplanet');
 
-      return resolve();
-    });
+    if (this.app.config.config.server.game === Game.trackmania)
+      this.callback.loadSet('trackmania');
   }
 
   /**
@@ -241,7 +208,7 @@ export class Client extends EventEmitter {
    *
    * @return {Promise}
    */
-  updateInfos() {
+  public async updateInfos() {
     // Update
     return this.getServerOptions()
       .then(() => this.getGameInfos());
@@ -252,7 +219,7 @@ export class Client extends EventEmitter {
    *
    * @returns {boolean}
    */
-  isScripted() {
+  public isScripted(): boolean {
     return this.game.CurrentGameInfos.GameMode === 0 || false;
   }
 
@@ -260,7 +227,7 @@ export class Client extends EventEmitter {
    * Get Current Mode Integer, try to convert script name to game mode integer.
    * @returns {number}
    */
-  currentMode() {
+  public currentMode(): number {
     if (this.isScripted()) {
       // TODO: Script => legacy integers.
     }
@@ -273,17 +240,13 @@ export class Client extends EventEmitter {
    *
    * @returns {Promise}
    */
-  getServerOptions() {
-    return new Promise((resolve, reject) => {
-      this.gbx.query('GetServerOptions', []).then((res) => {
-        // Update properties.
-        this.name = res.Name;
-        this.comment = res.Comment;
-        this.options = res;
+  public async getServerOptions(): Promise<any> {
+    let res = await this.gbx.query('GetServerOptions');
+    this.name = res.Name;
+    this.comment = res.Comment;
+    this.options = res;
 
-        return resolve(res);
-      }).catch((err) => reject(err));
-    });
+    return res;
   }
 
   /**
@@ -291,20 +254,18 @@ export class Client extends EventEmitter {
    *
    * @returns {Promise}
    */
-  getGameInfos() {
-    return new Promise((resolve, reject) => {
-      this.gbx.query('GetGameInfos', []).then((res) => {
-        this.game = res;
-        return resolve(res);
-      }).catch((err) => reject(err));
-    });
+  public async getGameInfos(): Promise<any> {
+    let res = await this.gbx.query('GetGameInfos');
+    this.game = res;
+
+    return res;
   }
 
   /**
    * Get Server Directories.
    * @returns Promise promise with object: data, maps, skins.
    */
-  getServerDirectories () {
+  public async getServerDirectories(): Promise<any> {
     return new Promise((resolve, reject) => {
       this.gbx.query('system.multicall', [[
         {methodName: 'GameDataDirectory', params: []},
@@ -317,7 +278,6 @@ export class Client extends EventEmitter {
       });
     });
   }
-
 }
 
 export enum Game {

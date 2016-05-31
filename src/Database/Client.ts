@@ -1,15 +1,17 @@
 
 import * as path from 'path';
 import * as glob from 'glob';
-import {Sequelize} from 'sequelize';
+import * as Sequelize from 'sequelize';
+import {Sequelize as SequelizeInstance} from 'sequelize';
 
 import {App} from '../app';
 import {Configuration, DatabaseDialect} from './../util/configuration';
 
+
 export class Client {
 
   private app: App;
-  private sequelize: Sequelize;
+  private sequelize: SequelizeInstance;
 
   private options: any;
 
@@ -71,7 +73,7 @@ export class Client {
    * @async
    */
   public connect () {
-    this.sequelize = new Sequelize.Sequelize(this.database, this.username, this.password, this.options);
+    this.sequelize = new Sequelize(this.database, this.username, this.password, this.options);
   }
 
   /**

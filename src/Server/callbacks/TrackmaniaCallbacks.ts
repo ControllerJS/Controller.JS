@@ -1,7 +1,8 @@
 /**
  * TrackMania Callbacks
  */
-'use strict';
+
+import {CallbackManager} from '../CallbackManager';
 
 /**
  * Run the registers.
@@ -9,7 +10,7 @@
  * @param {CallbackManager} manager
  * @param {function} manager.register
  */
-export default function (manager) {
+export default function (manager: CallbackManager) {
 
   manager.register({
     callback: 'TrackMania.PlayerCheckpoint',

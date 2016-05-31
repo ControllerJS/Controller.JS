@@ -7,8 +7,8 @@ import {Maps} from './Maps';
 export module Game {
   export class Facade extends BaseFacade {
 
-    private players: Players;
-    private maps: Maps;
+    public players: Players;
+    public maps: Maps;
 
     constructor () {
       super();
