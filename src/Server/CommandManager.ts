@@ -5,6 +5,7 @@
 import {EventEmitter} from 'events';
 import {App} from '../App';
 import {Client} from './Client';
+import {Server} from './index';
 
 export interface CommandOptions {
   level?: number;
@@ -26,16 +27,19 @@ export class CommandManager {
   private commands: {[s:string]:CommandOptions} = {};
   private adminCommands: {[s:string]:CommandOptions} = {};
 
+  private facade: Server.Facade;
+
   /**
-   * @param {App} app
-   * @param {ServerClient} client
+   * Constructor Command Manager.
+   * @param {Server.Facade} facade
    */
-  constructor(client) {
+  constructor(facade: Server.Facade) {
     this.events = new EventEmitter();
     this.events.setMaxListeners(0);
 
-    this.app = App.instance;
-    this.client = client;
+    this.facade = facade;
+    this.app = facade.app;
+    this.client = facade.client;
 
     this.commands = {};
     this.adminCommands = {};

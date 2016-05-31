@@ -1,3 +1,4 @@
+import {BaseFacade} from '../Util/Facade';
 /**
  * Client Manager - Will connect to the maniaplanet server
  */
@@ -12,10 +13,12 @@ import {CallbackManager} from './CallbackManager';
 import {CommandManager} from './CommandManager';
 import {Send} from './Send';
 import {App} from '../App';
+import {Server} from './index';
 
 export class Client extends EventEmitter {
 
   private app: App;
+  private facade: Server.Facade;
 
   public gbx: any;
   public command: CommandManager;
@@ -49,11 +52,12 @@ export class Client extends EventEmitter {
   /**
    * Prepare the client. parse configuration and pass it to the gbx client.
    */
-  constructor() {
+  constructor(facade: Server.Facade) {
     super();
     this.setMaxListeners(0);
 
-    this.app = App.instance;
+    this.facade = facade;
+    this.app = facade.app;
 
     this.gbx = null;
     /** @type {CallbackManager} */
@@ -77,7 +81,7 @@ export class Client extends EventEmitter {
    * @returns {Send}
    */
   public send(): Send {
-    return new Send(this);
+    return new Send(this.facade);
   }
 
   /**
@@ -195,8 +199,8 @@ export class Client extends EventEmitter {
   public async register() {
     this.app.log.debug('Registering callbacks...');
 
-    this.callback = new CallbackManager(this);
-    this.command = new CommandManager(this);
+    this.callback = new CallbackManager(this.facade);
+    this.command = new CommandManager(this.facade);
 
     this.callback.loadSet('maniaplanet');
 

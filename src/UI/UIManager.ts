@@ -5,6 +5,7 @@
 import {EventEmitter} from 'events';
 import {App} from '../App';
 import {Interface} from './Interface';
+import {UI} from './index';
 
 /**
  * UI Manager
@@ -18,16 +19,19 @@ import {Interface} from './Interface';
  */
 export class UIManager extends EventEmitter {
 
+  private facade: UI.Facade;
   private app: App;
   private interfaces: Map<string, Interface>;
 
   private interval: any;
 
-  constructor () {
+  constructor (facade: UI.Facade) {
     super();
     this.setMaxListeners(0);
 
-    this.app = App.instance;
+    this.facade = facade;
+    this.app = facade.app;
+
     this.interfaces = new Map();
 
     // Update Interval

@@ -13,21 +13,14 @@ import {Game} from './Game/index';
 import {UI} from './UI/index';
 
 import {Client as ServerClient} from './Server/Client';
-
+import {Logger as Bunyan} from 'bunyan';
 
 /**
  * ManiaJS App
  */
 export class App {
-  private static _instance: App;
-
-  public static get instance() {
-    if (! App._instance)
-      App._instance = new App(Logger.instance, Configuration.instance.version, Configuration.instance.config);
-    return App._instance;
-  }
-
-  public log: Logger;
+  public logger: Logger;
+  public log: Bunyan;
   public version: string;
   public config: ConfigSchema;
 
@@ -54,21 +47,25 @@ export class App {
   public models: { [s: string]: any } = {};
   public plugins: { [s: string]: any } = {}; // TODO: Change to ModulePlugin once the interface is converted too.
 
+  configuration: Configuration;
+
   constructor (
     logger: Logger,
-    version: string,
-    config: ConfigSchema
+    configuration: Configuration
   ) {
-    this.log = logger;
-    this.version = version;
-    this.config = config;
+    this.configuration = configuration;
+    this.config = configuration.config;
+    this.version = configuration.version;
 
-    this.serverFacade = new Server.Facade();
-    this.databaseFacade = new Database.Facade();
-    this.pluginFacade = new Plugin.Facade();
-    this.gameFacade = new Game.Facade();
-    this.uiFacade = new UI.Facade();
-    this.utilFacade = new Util.Facade();
+    this.logger = logger;
+    this.log = logger.log;
+
+    this.serverFacade = new Server.Facade(this);
+    this.databaseFacade = new Database.Facade(this);
+    this.pluginFacade = new Plugin.Facade(this);
+    this.gameFacade = new Game.Facade(this);
+    this.uiFacade = new UI.Facade(this);
+    this.utilFacade = new Util.Facade(this);
 
     this.players = this.gameFacade.players;
     this.maps = this.gameFacade.maps;
@@ -115,5 +112,4 @@ export class App {
     this.databaseFacade.stop();
     this.utilFacade.stop();
   }
-
 }

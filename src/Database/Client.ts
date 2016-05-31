@@ -5,7 +5,8 @@ import * as Sequelize from 'sequelize';
 import {Sequelize as SequelizeInstance} from 'sequelize';
 
 import {App} from '../app';
-import {Configuration, DatabaseDialect} from './../util/configuration';
+import {Database} from './index';
+import {DatabaseDialect} from './../util/configuration';
 
 
 export class Client {
@@ -19,11 +20,11 @@ export class Client {
   private username: string;
   private password: string;
 
-  constructor () {
-    this.app = App.instance;
+  constructor (facade: Database.Facade) {
+    this.app = facade.app;
+    let config = facade.config.config.config.db;
     this.sequelize = null;
 
-    let config = Configuration.instance.config.config.db;
     let options = {
       pool: config.pool
     };

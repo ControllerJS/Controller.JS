@@ -6,6 +6,7 @@ import {EventEmitter} from 'events';
 import {Player} from '../../Game/Players';
 import {App} from '../../App';
 import {Interface} from '../Interface';
+import {UI} from './../index';
 
 /**
  * List View
@@ -21,6 +22,7 @@ import {Interface} from '../Interface';
  */
 export class ListView extends EventEmitter {
 
+  private facade: UI.Facade;
   private app: App;
 
   public title: string;
@@ -47,16 +49,18 @@ export class ListView extends EventEmitter {
 
   /**
    * Construct List View
+   * @param {UI.Facade} facade
    * @param {string} title
    * @param {Player} player
    * @param {[{name: {string}, field: {string}, width: {number}, [level]: {number}, [event]: {string}}]} columns Columns to define.
    * @param {[{}]} data Array with objects. Give a custom manialink with the 'custom' key. This will be injected into the row!
    */
-  constructor (title: string, player: Player, columns: any, data: any) { // TODO: Column type!
+  constructor (facade: UI.Facade, title: string, player: Player, columns: any, data: any) { // TODO: Column type!
     super();
     this.setMaxListeners(0);
 
-    this.app = App.instance;
+    this.facade = facade;
+    this.app = facade.app;
 
     this.title = title;
     this.player = player;

@@ -8,6 +8,8 @@ import {UIManager} from './UIManager';
 import {Interface} from './Interface';
 import {GenericInterface} from './GenericInterface';
 import {ListView} from './Generic/ListView';
+import {Configuration} from '../Util/Configuration';
+import {App} from '../App';
 
 /**
  * UI Facade
@@ -24,10 +26,13 @@ export module UI {
     public manager: UIManager;
     public generic: GenericInterface;
 
-    constructor () {
-      super();
-      this.manager = new UIManager();
-      this.generic = new GenericInterface();
+    constructor (
+      app: App
+    ) {
+      super(app);
+
+      this.manager = new UIManager(this);
+      this.generic = new GenericInterface(this);
     }
 
     public async init() {
@@ -69,7 +74,7 @@ export module UI {
         viewName += '.hbs';
       }
 
-      return new Interface(path.normalize(baseDirectory + viewName), plugin, version, idSuffix);
+      return new Interface(this, path.normalize(baseDirectory + viewName), plugin, version, idSuffix);
     }
 
 

@@ -6,6 +6,8 @@ import {Configuration} from './Util/Configuration';
 import {Logger} from './Util/Logger';
 import {App} from './App';
 
+require('source-map-support').install();
+
 let packageInfo = require('./../package.json');
 
 let program: any = new Command()
@@ -17,7 +19,7 @@ let program: any = new Command()
 /**
  * Load Configuration
  */
-let configuration = Configuration.instance;
+let configuration = new Configuration();
 
 try {
   var configPath = null;
@@ -40,24 +42,28 @@ try {
 }
 
 /** Prepare Logging */
-let logger = Logger.instance;
-logger.info('Starting ManiaJS...');
+let logger = new Logger();
+let log = logger.log;
+log.info('Starting ManiaJS...');
 
 /**
  * Prepare Controller
  */
-let app = App.instance;
+let app = new App(
+  logger,
+  configuration
+);
 
 /**
  * Exit/Error handlers.
  */
 function exitHandler(options) {
   if (options.cleanup) {
-    logger.info('ManiaJS is going to shutdown...');
+    log.info('ManiaJS is going to shutdown...');
     app.exit();
   }
   if (options.error)
-    logger.error('Uncaught Exception: ', options.error.stack);
+    log.error('Uncaught Exception: ', options.error.stack);
   if (options.exit) {
     process.exit();
   }
@@ -66,7 +72,6 @@ process.on('exit',              (   ) => exitHandler({cleanup: true}));
 process.on('SIGINT',            (   ) => exitHandler({exit   : true}));
 process.on('uncaughtException', (err) => exitHandler({error  : err}));
 
-
 /**
  * Start Controller
  */
@@ -74,4 +79,6 @@ async function start () {
   await app.prepare();
   await app.run();
 }
-start().catch(err => logger.fatal(err));
+try {
+  start();
+} catch (err) { log.fatal(err); }

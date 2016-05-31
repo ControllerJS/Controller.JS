@@ -4,8 +4,7 @@ import * as directory from './Directory'
 import * as fs from 'fs';
 import * as yaml from 'js-yaml';
 import {Game} from '../Server/Client';
-
-let Package = require('./../../package.json');
+import * as Package from 'pjson';
 
 /**
  * Configuration Class. Access by using the instance export.
@@ -13,31 +12,19 @@ let Package = require('./../../package.json');
 export class Configuration {
   private raw: any;
   private location: string;
+  private pkg: any;
 
   public  config: ConfigSchema;
   public  version: string;
 
-  private static _instance: Configuration;
-
-  public static get instance() {
-    if (! Configuration._instance)
-      Configuration._instance = new Configuration();
-    return Configuration._instance;
-  }
-
   constructor() {
-    this.version = Package.version;
+    this.pkg = Package;
+    this.version = this.pkg.version;
   }
 
-  public load (location?: string): boolean {
-    try {
-      this.location = location || directory.rootPath() + 'config.yaml';
-      this.config = yaml.safeLoad(fs.readFileSync(this.location, 'utf8'));
-    } catch (error) {
-      console.error(error);
-      return false;
-    }
-    return true;
+  public load (location?: string) {
+    this.location = location || directory.rootPath() + 'config.yaml';
+    this.config = yaml.safeLoad(fs.readFileSync(this.location, 'utf8'));
   }
 
   public validate(): boolean {
@@ -54,20 +41,22 @@ let schema = {
   config: {
     debug: Joi.boolean(),
     server: {
+      game: Joi.string().required(),
       address: Joi.string().required(),
       port: Joi.number().required(),
       authentication: {
         username: Joi.string().required(),
-        password: Joi.string().required()
+        password: Joi.string()
       }
     },
     masteradmins: Joi.array().items(Joi.string()),
     db: {
-      dialect: Joi.array().items(Joi.string().valid('mysql', 'mariadb', 'sqlite')),
+      debug: Joi.any().optional(),
+      dialect: Joi.string().valid('mysql', 'mariadb', 'sqlite'),
       database: Joi.string(),
       authentication: {
-        username: Joi.string(),
-        password: Joi.string()
+        username: Joi.any().optional(),
+        password: Joi.any().optional()
       }, pool: {
         max: Joi.number().required(),
         min: Joi.number().required(),
@@ -86,7 +75,7 @@ let schema = {
       }
     }
   },
-  plugins: Joi.array()
+  plugins: Joi.any()
 };
 
 export interface ConfigSchema {

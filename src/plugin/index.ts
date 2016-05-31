@@ -2,6 +2,8 @@
 
 import {BaseFacade} from '../Util/Facade';
 import {PluginManager} from './PluginManager';
+import {Configuration} from '../Util/Configuration';
+import {App} from '../App';
 
 export module Plugin {
 
@@ -12,10 +14,12 @@ export module Plugin {
 
     public manager: PluginManager;
 
-    constructor () {
-      super();
+    constructor (
+      app: App
+    ) {
+      super(app);
 
-      this.manager = new PluginManager();
+      this.manager = new PluginManager(this);
     }
 
     public async init() {}

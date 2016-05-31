@@ -21,9 +21,9 @@ export class GenericInterface {
   private app: App;
   private facade: UI.Facade;
 
-  constructor () {
-    this.app = App.instance;
-    this.facade = this.app.uiFacade;
+  constructor (facade: UI.Facade) {
+    this.facade = facade;
+    this.app = facade.app;
   }
 
   /**
@@ -46,7 +46,7 @@ export class GenericInterface {
     let playerObject: Player = this.app.gameFacade.players.list[player] || null;
     if (! playerObject) throw new Error('Player could not be loaded!');
 
-    let view = new ListView(title, playerObject, columns, data);
+    let view = new ListView(this.facade, title, playerObject, columns, data);
         view.parse();
     return view;
   }

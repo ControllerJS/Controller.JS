@@ -5,6 +5,7 @@
 
 import {App} from '../App';
 import {Instance} from 'sequelize';
+import {Game} from './index';
 
 export interface Player extends Instance<any> {
   login: string;
@@ -52,9 +53,11 @@ export default class Players {
   public online: {[s: string]: Player | boolean};
 
   private app: App;
+  private facade: Game.Facade;
 
-  constructor() {
-    this.app = App.instance;
+  constructor(facade: Game.Facade) {
+    this.facade = facade;
+    this.app = facade.app;
 
     this.list = {};
     this.online = {};

@@ -7,6 +7,7 @@ import {DepGraph, DependencyGraph} from 'dependency-graph';
 
 import {App} from '../App';
 import {Sequelize} from 'sequelize';
+import {BaseFacade} from '../Util/Facade';
 
 export class ModulePlugin {
   // TODO: Define in interface project
@@ -25,11 +26,15 @@ export class PluginManager {
   private plugins: {[s: string]: any}; // TODO: Interface project, the definition of plugin itself.
   private order: Array<string>; // Order of plugin UID's.
 
+  private facade: BaseFacade;
+
   /**
    * Construct plugin manager.
    */
-  constructor() {
-    this.app = App.instance;
+  constructor(facade: BaseFacade) {
+    this.facade = facade;
+    this.app = facade.app;
+
     this.graph = DepGraph();
 
     // ObjectArray

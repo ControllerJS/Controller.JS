@@ -1,15 +1,20 @@
 
 import {App} from '../App';
 import {Logger} from './Logger';
+import {Configuration} from './Configuration';
 
 export abstract class BaseFacade {
 
-  protected app: App;
-  protected log: Logger;
+  public app: App;
+  public log: Logger;
+  public config: Configuration;
 
-  constructor () {
-    this.app = App.instance;
-    this.log = Logger.instance;
+  constructor (
+    app: App
+  ) {
+    this.app = app;
+    this.log = app.logger;
+    this.config = app.configuration;
   }
 
   public abstract async init();

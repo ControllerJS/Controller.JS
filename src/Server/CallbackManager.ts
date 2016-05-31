@@ -7,6 +7,7 @@
 
 import {App} from './../App';
 import {Client, Game} from './Client';
+import {Server} from './index';
 
 import ManiaPlanetCalls from './callbacks/ManiaplanetCallbacks';
 import TrackManiaCalls from './callbacks/TrackmaniaCallbacks';
@@ -39,9 +40,9 @@ export class CallbackManager {
   private app: App;
   private client: Client;
 
-  constructor(client: Client) {
-    this.app = App.instance;
-    this.client = client;
+  constructor(facade: Server.Facade) {
+    this.app = facade.app;
+    this.client = facade.client;
   }
 
   /**

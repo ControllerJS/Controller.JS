@@ -5,6 +5,7 @@
 
 import {Client} from './Client';
 import {App} from '../App';
+import {Server} from './index';
 
 /**
  * Global Send Queue. When using delayed sending.
@@ -26,15 +27,17 @@ export class Send {
 
   private queue: any[];
 
+  private facade: Server.Facade;
+
   /**
    * Construct sending query instance.
    *
-   * @param {App} app
-   * @param {ServerClient} client
+   * @param facade
    */
-  constructor(client: Client) {
-    this.app = App.instance;
-    this.client = client;
+  constructor(facade: Server.Facade) {
+    this.facade = facade;
+    this.app = facade.app;
+    this.client = facade.client;
 
     // Contains the sending queues. (raw).
     this.queue = [];

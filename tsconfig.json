@@ -8,7 +8,6 @@
         "sourceMap": true,
         "removeComments": false,
         "noImplicitAny": false,
-        "noEmitHelpers": true,
         "outDir": "./lib"
     },
     "exclude": [

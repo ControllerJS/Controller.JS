@@ -14,6 +14,7 @@
     "lodash": "registry:dt/lodash#3.10.0+20160330154726",
     "minimatch": "registry:dt/minimatch#2.0.8+20160317120654",
     "node": "registry:dt/node#6.0.0+20160524002506",
+    "pjson": "file:./typings/custom/pjson/typings.json",
     "sequelize": "registry:dt/sequelize#3.4.1+20160423143634",
     "sprintf-js": "registry:dt/sprintf-js#0.0.0+20160317120654",
     "validator": "registry:dt/validator#4.5.1+20160316155526"

@@ -5,6 +5,7 @@
 import {App} from '../App';
 import {Model} from 'sequelize';
 import {Instance} from 'sequelize';
+import {Game} from './index';
 
 // TODO
 export interface Map extends Instance<any> {
@@ -19,13 +20,15 @@ export interface Map extends Instance<any> {
  */
 export class Maps {
 
+  private facade: Game.Facade;
   private app: App;
 
   public list: {[s:string]: Map};
   public current: Map;
 
-  constructor() {
-    this.app = App.instance;
+  constructor(facade: Game.Facade) {
+    this.facade = facade;
+    this.app = facade.app;
 
     /**
      * Maplist.

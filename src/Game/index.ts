@@ -3,6 +3,8 @@
 import {BaseFacade} from '../Util/Facade';
 import Players from './Players';
 import {Maps} from './Maps';
+import {Configuration} from '../Util/Configuration';
+import {App} from '../App';
 
 export module Game {
   export class Facade extends BaseFacade {
@@ -10,11 +12,13 @@ export module Game {
     public players: Players;
     public maps: Maps;
 
-    constructor () {
-      super();
+    constructor (
+      app: App
+    ) {
+      super(app);
 
-      this.players = new Players();
-      this.maps = new Maps();
+      this.players = new Players(this);
+      this.maps = new Maps(this);
     }
 
     public async init() {}

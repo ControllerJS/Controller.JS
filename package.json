@@ -46,7 +46,9 @@
     "js-yaml": "^3.6.1",
     "moment": "^2.13.0",
     "mysql": "^2.10.2",
+    "pjson": "^1.0.7",
     "sequelize": "^3.23.3",
+    "source-map-support": "^0.4.0",
     "sprintf-js": "^1.0.3"
   },
   "optionalDependencies": {

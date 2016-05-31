@@ -1,6 +1,8 @@
 
 import {BaseFacade} from '../util/facade';
 import {Client} from './Client';
+import {Configuration} from '../Util/Configuration';
+import {App} from '../App';
 
 export module Database {
   /**
@@ -12,8 +14,12 @@ export module Database {
      */
     private client: Client;
 
-    constructor () {
-      super();
+    constructor (
+      app: App
+    ) {
+      super(app);
+
+      this.client = new Client(this);
     }
 
     /**

@@ -5,6 +5,7 @@
 import * as fs from 'fs';
 import * as Handlebars from 'handlebars';
 import {App} from '../App';
+import {UI} from './index';
 
 /**
  * Interface Class
@@ -22,6 +23,7 @@ import {App} from '../App';
 export class Interface {
 
   private app: App;
+  private facade: UI.Facade;
 
   private id: any;
 
@@ -42,12 +44,16 @@ export class Interface {
 
   /**
    * Construct the Interface.
+   * @param {UI.Facade} facade
    * @param {string} viewFile View File.
    * @param {{}} [plugin] Plugin Context, optional, only when calling from plugin.
    * @param {number} [version] ManiaLink Version, defaults to 2.
    * @param {string} [idSuffix] Unique ID Suffix. Optional, But give when interface is for one player only!
    */
-  constructor (viewFile, plugin, version, idSuffix) {
+  constructor (facade: UI.Facade, viewFile, plugin, version, idSuffix) {
+    this.facade = facade;
+    this.app = facade.app;
+
     plugin = plugin || false;
     version = version || 2;
     idSuffix = idSuffix || '';
@@ -57,8 +63,6 @@ export class Interface {
     if (idSuffix) {
       this.id += idSuffix;
     }
-
-    this.app = App.instance;
 
     this.plugin = plugin;
     this.file = viewFile;
