@@ -1,11 +1,10 @@
 /**
  * UI Manager
  */
-'use strict';
 
-import * as async from 'async';
-
-import { EventEmitter } from 'events';
+import {EventEmitter} from 'events';
+import {App} from '../App';
+import {Interface} from './Interface';
 
 /**
  * UI Manager
@@ -17,14 +16,18 @@ import { EventEmitter } from 'events';
  *
  * @property {Map} interfaces  Player Specifics Interfaces.
  */
-export default class UIManager extends EventEmitter {
+export class UIManager extends EventEmitter {
 
-  constructor (app) {
+  private app: App;
+  private interfaces: Map<string, Interface>;
+
+  private interval: any;
+
+  constructor () {
     super();
     this.setMaxListeners(0);
 
-    this.app = app;
-
+    this.app = App.instance;
     this.interfaces = new Map();
 
     // Update Interval
@@ -34,7 +37,7 @@ export default class UIManager extends EventEmitter {
   /**
    * Execute when server is started. (run mode).
    */
-  start () {
+  public start () {
     // Callbacks
     this.app.server.on('player.disconnect', (player) => this.playerDisconnect(player));
   }
@@ -44,15 +47,14 @@ export default class UIManager extends EventEmitter {
    *
    * @param player
    */
-  playerDisconnect(player) {
+  public playerDisconnect(player) {
     // Try to cleanup player's data in UI's.
-    this.interfaces.forEach((ui) => {
+    for (let [id, ui] of this.interfaces) {
       if (ui.playerData.hasOwnProperty(player.login)) {
         ui.destroy([player.login], true);
       }
-    });
+    }
   }
-
 
   /**
    * Update Interface.
@@ -63,7 +65,7 @@ export default class UIManager extends EventEmitter {
    *
    * @returns {Promise}
    */
-  update (ui, force, logins) {
+  public update (ui, force, logins) {
     if (! this.interfaces.has(ui.id)) {
       this.interfaces.set(ui.id, ui);
     }
@@ -78,7 +80,6 @@ export default class UIManager extends EventEmitter {
     return this.sendInterface(ui, sendForce, sendLogins);
   }
 
-
   /**
    * Will send UI, parse the (players)data.
    * @param {InterfaceBuilder} ui
@@ -87,7 +88,7 @@ export default class UIManager extends EventEmitter {
    *
    * @returns {Promise}
    */
-  sendInterface (ui, force, updateLogins) {
+  public sendInterface (ui, force, updateLogins) {
     return new Promise((resolve, reject) => {
       var data    = {}; // Holds all global data.
       var players = []; // Holds login.
@@ -174,7 +175,7 @@ export default class UIManager extends EventEmitter {
    * @param {string[]|boolean} [logins] Array with logins, or false for all.
    * @param {boolean} [hide] Hide at client, default false.
    */
-  destroy (id, logins, hide) {
+  public destroy (id, logins?, hide?) {
     logins = logins || false;
     hide = hide || false;
 
@@ -202,7 +203,7 @@ export default class UIManager extends EventEmitter {
    * @param {string} params.answer
    * @param {[]}     params.entries
    */
-  answer (params) {
+  public answer (params) {
     // Emit event on manager.
     if (params.answer.indexOf('core_button_') === 0) {
       this.emit(params.answer.substr(12), params); // Only get the last bit if it's a core button.

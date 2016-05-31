@@ -2,15 +2,24 @@
 
 module.exports = {
   default: {
-    files: [
-      { src: 'src/**.ts'  , dest: 'lib'  },
-      // { src: 'test/**.ts' , dest: 'lib/test' }
-    ],
+    tsconfig: true
 
-    options: {
-      fast: 'never',
-      module: 'commonjs',
-      target: 'es6'
-    }
+  }
+};
+
+let t = {
+  files: [
+    {
+      src: ['src/*/**.ts', 'src/*.ts'],
+      dest: 'lib'
+    },
+    // { src: 'test/**.ts' , dest: 'lib/test' }
+  ],
+
+  options: {
+    // tsconfig: __dirname + '/../../tsconfig.json',
+    // fast: 'never',
+    // module: 'es6',
+    // target: 'es6'
   }
 };

@@ -19,8 +19,7 @@
     "node": ">=4.0.0"
   },
   "scripts": {
-    "preinstall": "npm i -g typescript typings supervisor karma-cli grunt-cli",
-    "postinstall": "tsd reinstall --save",
+    "preinstall": "npm i -g typescript typings grunt-cli typedoc",
     "ts": "grunt ts",
     "watch": "grunt watch",
     "start": "node ./maniajs.js",

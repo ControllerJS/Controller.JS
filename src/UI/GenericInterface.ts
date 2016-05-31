@@ -3,7 +3,12 @@
  */
 'use strict';
 
-import ListView from './generic/listview';
+import {ListView} from './Generic/ListView';
+
+import {App} from '../App';
+import {UI} from './index';
+import {Interface} from './Interface';
+import {Player} from '../Game/Players';
 
 /**
  * Generic Interface Helper.
@@ -11,11 +16,14 @@ import ListView from './generic/listview';
  * @class GenericInterface
  * @type {GenericInterface}
  */
-export default class GenericInterface {
+export class GenericInterface {
 
-  constructor (app, facade) {
-    this.app = app;
-    this.facade = facade;
+  private app: App;
+  private facade: UI.Facade;
+
+  constructor () {
+    this.app = App.instance;
+    this.facade = this.app.uiFacade;
   }
 
   /**
@@ -34,11 +42,11 @@ export default class GenericInterface {
    *
    * @returns {ListView|boolean} ListView on success, false on failure!
    */
-  list (title, player, columns, data) {
-    player = this.app.gameFacade.players.list[player] || false;
-    if (! player) return false;
+  public list (title: string, player: string, columns: any, data: any): ListView { // TODO: Column type!
+    let playerObject: Player = this.app.gameFacade.players.list[player] || null;
+    if (! playerObject) throw new Error('Player could not be loaded!');
 
-    let view = new ListView(this.app, title, player, columns, data);
+    let view = new ListView(title, playerObject, columns, data);
         view.parse();
     return view;
   }
@@ -54,11 +62,12 @@ export default class GenericInterface {
    * @param {string} [iconstyle] Icon Style, default 'Icons128x128_1'
    * @param {string} [iconsubstyle] Icon Sub Style, default 'Editor'
    *
-   * @returns {InterfaceBuilder} Interface Object, call .display() to display to the login(s).
+   * @returns {Interface} Interface Object, call .display() to display to the login(s).
    */
-  alert(title, message, players, size, button, iconstyle, iconsubstyle) {
+  public alert(title: string, message: string, players: string | string[],
+               size?: string, button?: string, iconstyle?: string, iconsubstyle?: string): Interface {
     if (typeof players === 'string') {
-      players = [players];
+      players = [players + ''];
     }
     let buttonText = {
       ok: button || 'OK'
@@ -79,11 +88,13 @@ export default class GenericInterface {
    * @param {string} [iconstyle] Icon Style, default 'Icons128x128_1'
    * @param {string} [iconsubstyle] Icon Sub Style, default 'Options'
    *
-   * @returns {InterfaceBuilder} Interface Object, call .display() to display to the login(s).
+   * @returns {Interface} Interface Object, call .display() to display to the login(s).
    */
-  confirm(title, message, players, size, buttonYes, buttonNo, iconstyle, iconsubstyle) {
+  public confirm(title: string, message: string, players: string | string[],
+                 size?: string, buttonYes?: string, buttonNo?: string, iconstyle?: string,
+                 iconsubstyle?: string): Interface {
     if (typeof players === 'string') {
-      players = [players];
+      players = [players + ''];
     }
     let buttonText = {
       yes: buttonYes || 'Yes',
@@ -108,7 +119,7 @@ export default class GenericInterface {
    * @param {string} [iconstyle]
    * @param {string} [iconsubstyle]
    *
-   * @returns {InterfaceBuilder}
+   * @returns {Interface}
    */
   _createAlert(type, title, message, players, size, buttonText, iconstyle, iconsubstyle) {
     if (typeof players === 'string') {
@@ -127,7 +138,7 @@ export default class GenericInterface {
     iconsubstyle = iconsubstyle || 'Editor';
     size = size || 'md';
 
-    let sizes = {boxWidth: 150, boxHeight: 75, barLeft: -75, barTop: 27};
+    let sizes: any = {boxWidth: 150, boxHeight: 75, barLeft: -75, barTop: 27};
     switch (size) {
       case 'sm':
         sizes.boxWidth = 100; sizes.boxHeight = 50;

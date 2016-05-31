@@ -1,10 +1,11 @@
 /**
  * List View
  */
-'use strict';
 
-import { EventEmitter } from 'events';
-
+import {EventEmitter} from 'events';
+import {Player} from '../../Game/Players';
+import {App} from '../../App';
+import {Interface} from '../Interface';
 
 /**
  * List View
@@ -18,20 +19,44 @@ import { EventEmitter } from 'events';
  * @property {[{name: {string}, field: {string}, width: {number}, [level]: {number}, [event]: {string}}]} columns Columns to define.
  * @property {[{}]} data Array with objects. Give a custom manialink with the 'custom' key. This will be injected into the row!
  */
-export default class ListView extends EventEmitter {
+export class ListView extends EventEmitter {
+
+  private app: App;
+
+  public title: string;
+  public player: Player;
+  public columns: any;
+  public data: any;
+
+  public ui: Interface;
+
+  public range: {start: number, stop: number};
+
+  private width: number;
+  private totalWidth: number;
+  private page: number;
+  private numRows: number;
+  private numCols: number;
+  private pages: number;
+
+  private header: Array<any>;
+  private body:   Array<any>;
+  private events: Array<any>;
+
+  private send: any;
+
   /**
    * Construct List View
-   * @param {App} app
    * @param {string} title
    * @param {Player} player
    * @param {[{name: {string}, field: {string}, width: {number}, [level]: {number}, [event]: {string}}]} columns Columns to define.
    * @param {[{}]} data Array with objects. Give a custom manialink with the 'custom' key. This will be injected into the row!
    */
-  constructor (app, title, player, columns, data) {
+  constructor (title: string, player: Player, columns: any, data: any) { // TODO: Column type!
     super();
     this.setMaxListeners(0);
 
-    this.app = app;
+    this.app = App.instance;
 
     this.title = title;
     this.player = player;
@@ -49,7 +74,7 @@ export default class ListView extends EventEmitter {
   /**
    * Parse Data and Columns and Prepare the UI. Must be called before the display or update command!
    */
-  parse () {
+  public parse () {
     this.width      = 210;
     this.totalWidth = 0;
 
@@ -65,7 +90,7 @@ export default class ListView extends EventEmitter {
 
     // Create header for player.
     var left = 0; // Current left position
-    this.columns.forEach((raw) => {
+    this.columns.forEach((raw: any) => {
       if (raw.hasOwnProperty('level') && this.player.level < raw.level) {
         return; // Skip, the player has no rights for this col!
       }
@@ -98,7 +123,7 @@ export default class ListView extends EventEmitter {
     this.numCols = this.header.length;
 
     if (this.totalWidth > this.width) {
-      throw new Error('Total Column Width is greater than the maximum of '+width+'!');
+      throw new Error('Total Column Width is greater than the maximum of ' + this.width + '!');
     }
 
 
@@ -106,7 +131,7 @@ export default class ListView extends EventEmitter {
     var pageItems = 0;
 
     // Make body!
-    this.data.forEach((rawRow, rowIdx) => {
+    this.data.forEach((rawRow: any, rowIdx: number) => {
       // Current left position
       var left = 0;
 
@@ -118,12 +143,12 @@ export default class ListView extends EventEmitter {
       // Row data.
       let row = {data: [], top: (pageItems * 6), even: (pageItems % 2 === 1)};
 
-      this.header.forEach((rawCol, colIdx) => {
+      this.header.forEach((rawCol: any, colIdx: number) => {
         if (rawCol.field && ! rawRow.hasOwnProperty(rawCol.field)) {
           this.app.log.info('List View: Data has no field as defined in column! Will be skipped!');
           return;
         }
-        let col = {};
+        let col: any = {};
 
         // Text/ManiaLink/button
         col.text = '';
@@ -191,7 +216,7 @@ export default class ListView extends EventEmitter {
   /**
    * Prepare the UI.
    */
-  prepare () {
+  private prepare () {
     this.ui.timeout = 0;
     this.ui.hideClick = false;
 
@@ -238,7 +263,7 @@ export default class ListView extends EventEmitter {
    * Handle Sorting Action
    * @todo:
    */
-  handleSort (login, column) {
+  private handleSort (login, column) {
     if (this.header.length <= column) {
       return;
     }
@@ -254,38 +279,38 @@ export default class ListView extends EventEmitter {
   /**
    * Handle Close Button.
    */
-  handleClose (login) {
+  private handleClose (login) {
     if (this.player.login === login) {
       this.close();
       this.emit('close', login);
     }
   }
 
-  handleLast (login) {
+  private handleLast (login) {
     if (this.player.login !== login) {
       return;
     }
     this.page = this.pages - 1;
     this.range.start = (15 * this.pages) - 15;
     this.range.stop  = (15 * this.pages);
-    this._pageUpdate();
+    this.pageUpdate();
 
     this.emit('last', login);
   }
 
-  handleFirst (login) {
+  private handleFirst (login) {
     if (this.player.login !== login) {
       return;
     }
     this.page = 0;
     this.range.start = 0;
     this.range.stop  = 15;
-    this._pageUpdate();
+    this.pageUpdate();
 
     this.emit('first', login);
   }
 
-  handleNext (login, skip) {
+  private handleNext (login, skip) {
     if (this.player.login !== login) {
       return;
     }
@@ -296,12 +321,12 @@ export default class ListView extends EventEmitter {
     this.range.stop  += (15 * skip);
     this.page += skip;
 
-    this._pageUpdate();
+    this.pageUpdate();
 
     this.emit('next', login);
   }
 
-  handlePrev (login, skip) {
+  private handlePrev (login, skip) {
     if (this.player.login !== login) {
       return;
     }
@@ -312,7 +337,7 @@ export default class ListView extends EventEmitter {
     this.range.stop  -= (15 * skip);
     this.page -= skip;
 
-    this._pageUpdate();
+    this.pageUpdate();
 
     this.emit('prev', login);
   }
@@ -322,7 +347,7 @@ export default class ListView extends EventEmitter {
    * @returns {Promise}
    * @private
    */
-  _pageUpdate() {
+  private async pageUpdate() {
     // Change page, change the slice!
     return this.ui.global({
       title: this.title,
@@ -349,7 +374,7 @@ export default class ListView extends EventEmitter {
    * @param {string} event
    * @param {{}}     params
    */
-  handle (event, params) {
+  public handle (event, params) {
     if (params.answer.indexOf('|') === -1) {
       return false;
     }
@@ -374,7 +399,7 @@ export default class ListView extends EventEmitter {
    *
    * @returns {Promise}
    */
-  display () {
+  public async display () {
     return this.ui.display();
   }
 
@@ -383,16 +408,16 @@ export default class ListView extends EventEmitter {
    *
    * @returns {Promise}
    */
-  close () {
+  public async close () {
     // Send empty manialink to the player with the same ID.
     return this.ui.destroy();
   }
 
   /**
    * Get UI instance.
-   * @returns {InterfaceBuilder}
+   * @returns {Interface}
    */
-  toUI () {
+  public toUI (): Interface {
     return this.ui;
   }
 }

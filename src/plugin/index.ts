@@ -4,13 +4,13 @@ import {BaseFacade} from '../Util/Facade';
 import {PluginManager} from './PluginManager';
 
 export module Plugin {
-  
+
   /**
    * Plugin Facade
    */
   export class Facade extends BaseFacade {
 
-    private manager: PluginManager;
+    public manager: PluginManager;
 
     constructor () {
       super();

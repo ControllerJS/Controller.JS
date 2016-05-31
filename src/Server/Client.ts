@@ -1,6 +1,7 @@
 /**
  * Client Manager - Will connect to the maniaplanet server
  */
+declare var GbxClient; // TODO: Propper fix gbxremote loading..
 
 import {Client as GbxClient} from 'gbxremote';
 

@@ -1,18 +1,16 @@
 /**
  * Interface Building Class, will trigger the template engine and fill with data.
  */
-'use strict';
 
 import * as fs from 'fs';
-import * as path from 'path';
-
 import * as Handlebars from 'handlebars';
+import {App} from '../App';
 
 /**
- * Interface Builder Class
+ * Interface Class
  *
- * @class InterfaceBuilder
- * @type {InterfaceBuilder}
+ * @class Interface
+ * @type {Interface}
  *
  * @property {{}|null} plugin Plugin Context, null if not running in plugin!
  * @property {string}  templatePath Template Base Path.
@@ -21,18 +19,35 @@ import * as Handlebars from 'handlebars';
  * @property {{}|null} template Handlebars Template Instance.
  * @property {{}} data Handlebars Data.
  */
-export default class InterfaceBuilder {
+export class Interface {
+
+  private app: App;
+
+  private id: any;
+
+  private plugin: any;
+  public file: string;
+  public version: number;
+  public template: HandlebarsTemplateDelegate = null;
+
+  public timeout: number = 0;
+  public hideClick: boolean = false;
+  private listeners: Array<{ action: string, callback: Function }> = [];
+
+  public globalData: any = {};
+  public playerData: {[s: string]: any} = {};
+
+  public forceUpdate: boolean = true;
+  public playersChanged: Array<any> = [];
 
   /**
-   * Construct the Interface Builder.
-   * @param {App} app App Context.
-   * @param {UIFacade} facade UI Facade.
+   * Construct the Interface.
    * @param {string} viewFile View File.
    * @param {{}} [plugin] Plugin Context, optional, only when calling from plugin.
    * @param {number} [version] ManiaLink Version, defaults to 2.
    * @param {string} [idSuffix] Unique ID Suffix. Optional, But give when interface is for one player only!
    */
-  constructor (app, facade, viewFile, plugin, version, idSuffix) {
+  constructor (viewFile, plugin, version, idSuffix) {
     plugin = plugin || false;
     version = version || 2;
     idSuffix = idSuffix || '';
@@ -43,25 +58,11 @@ export default class InterfaceBuilder {
       this.id += idSuffix;
     }
 
-    this.facade = facade;
-    this.app = app;
+    this.app = App.instance;
+
     this.plugin = plugin;
     this.file = viewFile;
     this.version = version;
-
-    this.template = null;
-
-    this.timeout = 0;
-    this.hideClick = false;
-
-    this.listeners = [];
-
-    this.globalData = {};
-    this.playerData = {};
-
-    // Holds force and changed data for players. Cache.
-    this.forceUpdate = true; // True will force to send to all players (global or per player).
-    this.playersChanged = [];
 
     // Directly compile (sync).
     this.compile();
@@ -69,10 +70,8 @@ export default class InterfaceBuilder {
 
   /**
    * Compile the template view file.
-   *
-   * @returns {Promise}
    */
-  compile () {
+  public compile () {
     try {
       let source = fs.readFileSync(this.file, 'utf-8');
       this.template = Handlebars.compile (source);
@@ -85,9 +84,9 @@ export default class InterfaceBuilder {
    * Set Data for the template.
    * @param {{}} data
    *
-   * @returns {InterfaceBuilder}
+   * @returns {Interface}
    */
-  global (data) {
+  public global (data): this {
     this.globalData = data;
 
     this.forceUpdate = true;
@@ -99,9 +98,9 @@ export default class InterfaceBuilder {
    * @param {string} login Player Login.
    * @param {{}} [data] Data. Indexed by Player Logins.
    *
-   * @returns {InterfaceBuilder}
+   * @returns {Interface}
    */
-  player (login, data) {
+  public player (login: string, data?: any): this {
     data = data || {};
 
     this.playerData[login] = data;
@@ -116,25 +115,25 @@ export default class InterfaceBuilder {
    * @see update
    * @returns {*}
    */
-  display () {
+  public async display () {
     return this.update();
   }
 
   /**
    * Update Interface. Will send update to the client(s).
    */
-  update () {
-    return this.facade.manager.update(this, this.forceUpdate, this.playersChanged);
+  public async update () {
+    return this.app.uiFacade.manager.update(this, this.forceUpdate, this.playersChanged);
   }
 
   /**
    * Hide the current ManiaLink.
-   * @param {string[]} [logins] Optional logins to hide the interface. Ignore or false for all players.
+   * @param {string[]|boolean} [logins] Optional logins to hide the interface. Ignore or false for all players.
    * @returns {Promise}
    */
-  hide (logins) {
-    logins = logins || false;
-    return this.facade.manager.destroy(this.id, logins);
+  public async hide (logins?: string[]) {
+    logins = logins || null;
+    return this.app.uiFacade.manager.destroy(this.id, logins);
   }
 
   /**
@@ -143,9 +142,9 @@ export default class InterfaceBuilder {
    * @param {boolean} [noHide] Optional, don't send empty manialink to hide, default false.
    * @returns {Promise}
    */
-  destroy (logins, noHide) {
-    logins = logins || false;
-    noHide = noHide || false;
+  public async destroy (logins?: string[], noHide?: boolean) {
+    logins = logins || null;
+    noHide = noHide || null;
 
     // Cleanup.
     if (! logins) {
@@ -161,15 +160,15 @@ export default class InterfaceBuilder {
     this.removeAllListeners();
 
     // Destroy at manager (and hide).
-    return this.facade.manager.destroy(this.id, logins, noHide === false);
+    return this.app.uiFacade.manager.destroy(this.id, logins, noHide === false);
   }
 
   /**
    * Remove all listeners from manager.
    */
-  removeAllListeners() {
+  public removeAllListeners() {
     this.listeners.forEach((listener) => {
-      this.facade.manager.removeListener(listener.action, listener.callback);
+      this.app.uiFacade.manager.removeListener(listener.action, listener.callback);
     });
   }
 
@@ -179,10 +178,10 @@ export default class InterfaceBuilder {
    * @param {callback} callback Callback.
    * @params {object} callback.data
    */
-  on (action, callback) {
+  public on (action: string, callback: Function) {
     this.listeners.push({action: action, callback: callback});
 
-    this.facade.manager.on(action, callback);
+    this.app.uiFacade.manager.on(action, callback);
   }
 
   /**
@@ -191,10 +190,9 @@ export default class InterfaceBuilder {
    * @param {callback} callback Callback.
    * @params {object} callback.data
    */
-  once (action, callback) {
+  public once (action: string, callback: Function) {
     this.listeners.push({action: action, callback: callback});
 
-    this.facade.manager.once(action, callback);
+    this.app.uiFacade.manager.once(action, callback);
   }
-
 }
