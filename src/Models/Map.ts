@@ -1,6 +1,8 @@
-'use strict';
 
-export default function (sequelize, DataTypes) {
+import {Sequelize} from 'sequelize';
+import {DataTypes} from 'sequelize';
+
+export default function (sequelize: Sequelize, DataTypes: DataTypes) {
   let Map = sequelize.define('Map', {
     uid: {
       type: DataTypes.STRING,

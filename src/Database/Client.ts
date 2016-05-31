@@ -87,7 +87,7 @@ export class Client {
    * Load All Models for the Core.
    */
   public async loadCoreModels () {
-    let list = glob.sync(path.normalize(__dirname + '/../models/') + '*.js');
+    let list = glob.sync(path.normalize(__dirname + '/../Models/') + '*.js');
 
     if (list.length > 0) {
       list.forEach((file) => {
