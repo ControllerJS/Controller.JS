@@ -20,7 +20,7 @@ tmp/*
 typings/*
 .grunt
 .baseDir.ts
-
+.tscache
 !typings/custom
 
 

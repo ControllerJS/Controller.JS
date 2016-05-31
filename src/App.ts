@@ -5,12 +5,12 @@
 import {Logger} from './Util/Logger';
 import {ConfigSchema, Configuration} from './Util/Configuration';
 
-import {Server} from './Server';
-import {Util} from './Util';
-import {Database} from './Database';
-import {Plugin} from './Plugin';
-import {Game} from './Game';
-import {UI} from './UI';
+import {Server} from './Server/index';
+import {Util} from './Util/index';
+import {Database} from './Database/index';
+import {Plugin} from './Plugin/index';
+import {Game} from './Game/index';
+import {UI} from './UI/index';
 
 import {Client as ServerClient} from './Server/Client';
 

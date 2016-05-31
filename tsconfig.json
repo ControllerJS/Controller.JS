@@ -1,7 +1,7 @@
 {
     "compilerOptions": {
         "target": "ES6",
-        "module": "es6",
+        "module": "commonjs",
         "moduleResolution": "classic",
         "emitDecoratorMetadata": true,
         "experimentalDecorators": true,
@@ -58,6 +58,7 @@
         "src/Util/Directory.ts",
         "src/Util/Facade.ts",
         "src/Util/index.ts",
-        "src/Util/Logger.ts"
+        "src/Util/Logger.ts",
+        "src/Util/Times.ts"
     ]
 }
