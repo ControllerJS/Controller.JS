@@ -97,14 +97,14 @@ export class App {
       await this.pluginFacade.run();
 
       this.log.info('Controller Ready!');
-      await this.server.send().chat(`$o$f90Mania$z$o$f90JS$z$fff: Controller ready! $n(${this.version})`).exec();
+      await this.server.send().chat(`$o$f90Mania$o$f90JS$z$fff$s: Controller ready! $n(${this.version})`).exec();
     } catch (err) {
       this.log.fatal(err);
     }
   }
 
   public async exit () {
-    this.server.send().chat('$o$f90Mania$z$o$f90JS$z$fff: Controller shutting down!').exec();
+    this.server.send().chat('$o$f90Mania$o$f90JS$z$fff$s: Controller shutting down!').exec();
     this.pluginFacade.stop();
     this.uiFacade.stop();
     this.gameFacade.stop();

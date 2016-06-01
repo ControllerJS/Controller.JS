@@ -94,7 +94,7 @@ export interface AppConfig {
       username: string,
       password: string
     },
-    game: Game,
+    game: string,
   },
   masteradmins?: string[],
   db: {

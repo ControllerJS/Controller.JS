@@ -59,7 +59,7 @@ export class CallbackManager {
    *
    * @param {function} options.flow Optional promise returning funciton for controlling the game flow. Calls with first parameter app and second params.
    */
-  public async register(options: CallbackOptions) {
+  public register(options: CallbackOptions) {
     let callbackName = options.callback;
     let eventName = options.event;
     let parameters = options.parameters || {};

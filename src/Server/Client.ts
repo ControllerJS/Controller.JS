@@ -15,7 +15,6 @@ import {App} from '../App';
 import {Server} from './index';
 
 export class Client extends EventEmitter {
-
   private app: App;
   private facade: Server.Facade;
 
@@ -43,7 +42,7 @@ export class Client extends EventEmitter {
     skins: string
   };
 
-  public gameName: Game;
+  public gameName: string;
 
   public options: any;
   public game: any;
@@ -68,7 +67,7 @@ export class Client extends EventEmitter {
     this.server = this.app.config.config.server;
 
     // Current Game Name, 'trackmania' or 'shootmania'.
-    this.gameName = this.app.config.config.server.game || Game.trackmania;
+    this.gameName = this.app.config.config.server.game || 'trackmania';
 
     this.options = {}; // Will be the result of GetServerOptions() call to the mp server.
     this.game = {}; // Will be the result of GetGameInfo() call.
@@ -123,7 +122,7 @@ export class Client extends EventEmitter {
       this.app.log.debug("Connection to ManiaPlanet Server, Successfully enabled callbacks!");
 
       // Send booting message to chat.
-      await this.send().chat("$o$f90Mania$z$o$f90JS$z$fff: Booting Controller...").exec();
+      await this.send().chat("$o$f90Mania$o$f90JS$z$fff$s: Booting Controller...").exec();
       // Hide all current ManiaLinks
       await this.gbx.query('SendHideManialinkPage');
 
@@ -203,7 +202,7 @@ export class Client extends EventEmitter {
 
     this.callback.loadSet('maniaplanet');
 
-    if (this.app.config.config.server.game === Game.trackmania)
+    if (this.app.config.config.server.game === 'trackmania')
       this.callback.loadSet('trackmania');
   }
 

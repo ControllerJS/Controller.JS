@@ -22,7 +22,7 @@ export module Server {
     }
 
     public async run () {
-      return this.client.register();
+      this.client.register();
     }
 
     public async stop () {}
