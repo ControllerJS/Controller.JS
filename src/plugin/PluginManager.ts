@@ -1,5 +1,5 @@
 
-import * as fs from 'fs';
+let fs = require('fs-promise');// import * as fs from 'fs-promise';
 import * as path from 'path';
 import * as glob from 'glob';
 
