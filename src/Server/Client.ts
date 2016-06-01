@@ -1,4 +1,3 @@
-import {BaseFacade} from '../Util/Facade';
 /**
  * Client Manager - Will connect to the maniaplanet server
  */

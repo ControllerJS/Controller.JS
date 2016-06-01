@@ -92,7 +92,7 @@ export module UI {
      * @param {[{name: {string}, field: {string}, width: {number}, [level]: {number}, [event]: {string}}]} columns Columns to define.
      * @param {[{}]} data Array with objects. Give a custom manialink with the 'custom' key. This will be injected into the row!
      *
-     * @returns {Interface} Interface on success!
+     * @returns {ListView} ListView Interface on success!
      */
     public list (title: string, player: string, columns: any,
                  data: any): ListView { // TODO: Column type!

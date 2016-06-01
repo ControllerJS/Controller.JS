@@ -52,7 +52,7 @@ let schema = {
     masteradmins: Joi.array().items(Joi.string()),
     db: {
       debug: Joi.any().optional(),
-      dialect: Joi.string().valid('mysql', 'mariadb', 'sqlite'),
+      dialect: Joi.string().valid('mysql', 'mssql', 'sqlite', 'postgres'),
       database: Joi.string(),
       authentication: {
         username: Joi.any().optional(),
@@ -131,7 +131,6 @@ export interface PluginConfig {
 export enum DatabaseDialect {
   mssql,
   mysql,
-  mariadb,
   sqlite,
   postgres
 }

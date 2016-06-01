@@ -155,7 +155,7 @@ export class CommandManager {
    * @param {CommandManager~CommandCallback} callback
    * @param {boolean} [single] Single time?
    */
-  register(command: string, options: CommandOptions | string | number | any, callback: Function, single?: boolean) {
+  public register(command: string, options: CommandOptions | string | number | any, callback: Function, single?: boolean) {
     // Parse optional and combined parameters.
     callback = callback || function() {};
     if (typeof options === 'number') {
