@@ -92,31 +92,31 @@ export class UIManager extends EventEmitter {
    *
    * @returns {Promise}
    */
-  public sendInterface (ui, force, updateLogins) {
-    return new Promise((resolve, reject) => {
-      var data    = {}; // Holds all global data.
-      var players = []; // Holds login.
+  public async sendInterface (ui: Interface, force: boolean, updateLogins: string[]) {
+    var data    = {}; // Holds all global data.
+    var players = []; // Holds login.
 
-      var send    = '';
+    var send    = '';
 
-      // Global Data
-      data = ui.globalData;
+    // Global Data
+    data = ui.globalData;
 
-      // Player specific, or global?
-      if (Object.keys(ui.playerData).length > 0) {
-        // Per player data, only send to the players.
-        if (force) {
-          players = Object.keys(ui.playerData);
-        } else {
-          players = updateLogins;
-        }
+    // Player specific, or global?
+    if (Object.keys(ui.playerData).length > 0) {
+      // Per player data, only send to the players.
+      if (force) {
+        players = Object.keys(ui.playerData);
+      } else {
+        players = updateLogins;
       }
+    }
 
-      // Foreach or global?
-      if (players.length > 0) {
-        // Player specific.
+    // Foreach or global?
+    if (players.length > 0) {
+      // Player specific.
 
-        async.eachSeries(players, (login, callback) => {
+      try {
+        for (let login of players) {
           let sendData = Object.assign({}, data, ui.playerData[login]);
 
           send =  '<manialink ';
@@ -126,27 +126,17 @@ export class UIManager extends EventEmitter {
           send += ui.template(sendData);
           send += '</manialink>';
 
-          this.app.server.send().custom('SendDisplayManialinkPageToLogin', [login, send, ui.timeout, ui.hideClick]).exec()
-            .then (()    => {
-              sendData = null;
-              return callback();
-            })
-            .catch((err) => {
-              sendData = null;
-              return callback(err);
-            });
-        }, (err) => {
-          send = null;
-          data = null;
-
-          if (err) {
-            return reject(err);
-          }
-          return resolve();
-        });
-      } else {
-
-
+          await this.app.server.send().custom('SendDisplayManialinkPageToLogin', [login, send, ui.timeout, ui.hideClick]).exec();
+          sendData = null;
+        }
+      } catch (err) {
+        send = null;
+        data = null;
+        this.app.log.error(err);
+        throw err;
+      }
+    } else {
+      try {
         // Global
         send =  '<manialink ';
         if(ui.version == 2)
@@ -155,21 +145,18 @@ export class UIManager extends EventEmitter {
         send += ui.template(data);
         send += '</manialink>';
 
-        this.app.server.send().custom('SendDisplayManialinkPage', [send, ui.timeout, ui.hideClick]).exec()
-          .then (()    => {
-            send = null;
-            data = null;
-            players = null;
-            return resolve();
-          })
-          .catch((err) => {
-            send = null;
-            data = null;
-            players = null;
-            return reject(err);
-          });
+        await this.app.server.send().custom('SendDisplayManialinkPage', [send, ui.timeout, ui.hideClick]).exec();
+        send = null;
+        data = null;
+        players = null;
+      } catch (err) {
+        send = null;
+        data = null;
+        players = null;
+        this.app.log.error(err);
+        throw err;
       }
-    });
+    }
   }
 
   /**
@@ -191,9 +178,8 @@ export class UIManager extends EventEmitter {
     }
 
     if (hide) {
-      if (logins) {
+      if (logins)
         return this.app.server.send().custom('SendDisplayManialinkPageToLogin', [logins.join(','), send, 0, false]).exec();
-      }
       return this.app.server.send().custom('SendDisplayManialinkPage', [send, 0, false]).exec();
     }
   }

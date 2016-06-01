@@ -8,6 +8,7 @@ module.exports = function (grunt) {
 
   grunt.loadNpmTasks('grunt-contrib-clean');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-copy');
   grunt.loadNpmTasks('grunt-tslint');
   grunt.loadNpmTasks('grunt-ts');
   grunt.loadNpmTasks('grunt-nsp');
@@ -15,13 +16,15 @@ module.exports = function (grunt) {
   grunt.registerTask('build', [
     'clean:default',
     'tslint:default',
-    'ts:default'
+    'ts:default',
+    'copy:default'
   ]);
 
   grunt.registerTask('dev', [
     'clean:default',
     'tslint:default',
     'ts:default',
+    'copy:default',
     'watch'
   ]);
 
@@ -29,6 +32,7 @@ module.exports = function (grunt) {
     'clean:default',
     'tslint:default',
     'ts:default',
+    'copy:default',
     'watch'
   ]);
 };

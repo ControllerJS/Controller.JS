@@ -25,16 +25,16 @@ export class Interface {
   private app: App;
   private facade: UI.Facade;
 
-  private id: any;
+  public id: any;
 
-  private plugin: any;
+  public plugin: any;
   public file: string;
   public version: number;
   public template: HandlebarsTemplateDelegate = null;
 
   public timeout: number = 0;
   public hideClick: boolean = false;
-  private listeners: Array<{ action: string, callback: Function }> = [];
+  public listeners: Array<{ action: string, callback: Function }> = [];
 
   public globalData: any = {};
   public playerData: {[s: string]: any} = {};
@@ -164,7 +164,7 @@ export class Interface {
     this.removeAllListeners();
 
     // Destroy at manager (and hide).
-    return this.app.uiFacade.manager.destroy(this.id, logins, noHide === false);
+    return this.app.uiFacade.manager.destroy(this.id, logins, noHide === null);
   }
 
   /**
