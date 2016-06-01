@@ -17,11 +17,15 @@ npm-debug.log*
 
 # Typescript
 tmp/*
-typings/*
 .grunt
 .baseDir.ts
 .tscache
+
+typings/*
 !typings/custom
+
+type/typings/*
+!type/typings/custom
 
 
 # Runtime data
