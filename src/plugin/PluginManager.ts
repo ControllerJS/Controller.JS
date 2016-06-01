@@ -3,11 +3,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import * as glob from 'glob';
 
-import {DepGraph, DependencyGraph} from 'dependency-graph';
-
 import {App} from '../App';
 import {Sequelize} from 'sequelize';
 import {BaseFacade} from '../Util/Facade';
+import {DepGraph} from '@tomvlk/dependency-graph';
 
 export class ModulePlugin {
   // TODO: Define in interface project
@@ -21,7 +20,7 @@ export class ModulePlugin {
 export class PluginManager {
 
   private app: App;
-  private graph: DependencyGraph;
+  private graph: any;
 
   private plugins: {[s: string]: any}; // TODO: Interface project, the definition of plugin itself.
   private order: Array<string>; // Order of plugin UID's.
@@ -35,7 +34,7 @@ export class PluginManager {
     this.facade = facade;
     this.app = facade.app;
 
-    this.graph = DepGraph();
+    this.graph = new DepGraph();
 
     // ObjectArray
     this.plugins = {};

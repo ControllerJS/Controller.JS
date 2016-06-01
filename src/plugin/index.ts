@@ -22,11 +22,16 @@ export module Plugin {
       this.manager = new PluginManager(this);
     }
 
-    public async init() {}
-
-    public async run () {
+    public async init() {
+      await this.manager.loadPlugins();
     }
 
-    public async stop() {}
+    public async run () {
+      await this.manager.startPlugins();
+    }
+
+    public async stop() {
+
+    }
   }
 }

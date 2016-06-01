@@ -30,7 +30,6 @@ export class Client {
     };
 
     if (config.dialect ===  DatabaseDialect.mysql
-      || config.dialect === DatabaseDialect.mariadb
       || config.dialect === DatabaseDialect.mssql
       || config.dialect === DatabaseDialect.postgres) {
 
