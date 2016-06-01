@@ -121,10 +121,10 @@ export class Send {
 }
 
 
-interface SendChatOptions {
+export interface SendChatOptions {
   source?: SendChatSource;
   destination?: boolean | string;
 }
-enum SendChatSource {
+export enum SendChatSource {
   player, server, global
 }

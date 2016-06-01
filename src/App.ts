@@ -47,7 +47,7 @@ export class App {
   public models: { [s: string]: any } = {};
   public plugins: { [s: string]: any } = {}; // TODO: Change to ModulePlugin once the interface is converted too.
 
-  configuration: Configuration;
+  public configuration: Configuration;
 
   constructor (
     logger: Logger,

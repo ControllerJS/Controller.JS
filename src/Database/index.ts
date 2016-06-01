@@ -12,7 +12,7 @@ export module Database {
     /**
      * Database Client.
      */
-    private client: Client;
+    public client: Client;
 
     constructor (
       app: App
@@ -56,7 +56,7 @@ export module Database {
         await this.client.loadCoreModels();
 
         // Plugin models.
-        // await this.app.pluginFacade.manager.loadModels(this.client.sequelize);
+        await this.app.pluginFacade.manager.loadModels(this.client.sequelize);
       } catch (error) {
         this.app.log.fatal('Fatal error with syncing/connecting to the database', error.stack);
         process.exit(1);

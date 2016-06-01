@@ -136,7 +136,7 @@ export default class Players {
    * @param {string} login
    * @returns {boolean}
    */
-  public isPlayer(login): boolean {
+  public isPlayer(login: string): boolean {
     return this.isLevel(login, 0);
   }
 
@@ -146,7 +146,7 @@ export default class Players {
    * @param {string} login
    * @returns {boolean}
    */
-  public isOperator(login): boolean {
+  public isOperator(login: string): boolean {
     return this.isLevel(login, 1);
   }
 
@@ -156,7 +156,7 @@ export default class Players {
    * @param {string} login
    * @returns {boolean}
    */
-  public isAdmin(login): boolean {
+  public isAdmin(login: string): boolean {
     return this.isLevel(login, 2);
   }
 
@@ -166,7 +166,7 @@ export default class Players {
    * @param {string} login
    * @returns {boolean}
    */
-  public isMasterAdmin(login): boolean {
+  public isMasterAdmin(login: string): boolean {
     return this.isLevel(login, 3);
   }
 
@@ -177,7 +177,7 @@ export default class Players {
    * @param {number} level Mininum level, 0, 1, 2 or 3.
    * @returns {boolean}
    */
-  public isMinimal(login, level): boolean {
+  public isMinimal(login: string, level: number): boolean {
     return this.isLevel(login, level, true);
   }
 

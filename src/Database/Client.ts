@@ -12,7 +12,7 @@ import {DatabaseDialect} from './../util/configuration';
 export class Client {
 
   private app: App;
-  private sequelize: SequelizeInstance;
+  public sequelize: SequelizeInstance;
 
   private options: any;
 
